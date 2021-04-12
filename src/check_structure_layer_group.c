@@ -40,6 +40,7 @@ int check_layer_group(crystal* xtal)
     //if result in a higher symmetry
     if (match == 0)
     {
+	  //printf("I am inside match0");
 	  //add the attemtped lg to test its operations
 	  spglib_lg[5] = attempted_lg;
 	  int array_compatible_lg[6];
@@ -53,6 +54,7 @@ int check_layer_group(crystal* xtal)
 		  if (lg != 0)
 		    {
 				//printf("lg is %d\n",lg);
+				//printf("I am inside the loop");
 			    float Z = xtal->Z;
     			float N = xtal->num_atoms_in_molecule;
 		        crystal *tmp_xtal = (crystal *)malloc(sizeof(crystal) );
@@ -128,7 +130,11 @@ int check_symmet_equiv_atoms(int lg,crystal* tmp_xtal,int Z, int N)
 	FILE *out_file;
 	char f_orig_xtal_name[20] = "original_frac.in";
 	out_file = fopen(f_orig_xtal_name,"w");
-	print_layer2file(tmp_xtal,out_file);
+	//print_layer2file(tmp_xtal,out_file);
+	for (int i =0;i<20;i++)
+	{
+		printf("%f,%f,%f\n",tmp_xtal->Xcord[i],tmp_xtal->Ycord[i],tmp_xtal->Zcord[i]);
+	}
 	fclose(out_file);
 
 
@@ -177,7 +183,7 @@ int check_symmet_equiv_atoms(int lg,crystal* tmp_xtal,int Z, int N)
 		copy_xtal(tmp_xtal_each_op, tmp_xtal);
 		tmp_xtal_each_op->wyckoff_position = 3;
 		int symme_equivalent = 0;
-
+		printf("its operation %d\n",i+1);
 
 	    // loop over all atoms in crystal
 	    for (int j = 0; j < N * Z; j++)
@@ -258,7 +264,7 @@ int compare_all_atoms_distance(crystal* tmp_xtal,crystal* tmp_xtal_each_op)
 		atomi_array[1] = tmp_xtal->Ycord[i];
 		atomi_array[2] = tmp_xtal->Zcord[i];
 		
-		printf("atom %f	%f %f\n",atomi_array[0],atomi_array[1],atomi_array[2]);
+		printf("atom checking is %f	%f %f\n",atomi_array[0],atomi_array[1],atomi_array[2]);
 		for (int j =0;j< total_atoms  ; j++)
 		{
 			float atomj_array[3];
