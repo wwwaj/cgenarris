@@ -196,7 +196,7 @@ int generate_substrate_lattice_combs(int *all_substrate_combo, float lattice_vec
 	float prim_lv[3][3] = {{lattice_vector_2d[0][0],lattice_vector_2d[0][1],lattice_vector_2d[0][2] },
 						   {lattice_vector_2d[1][0],lattice_vector_2d[1][1],lattice_vector_2d[1][2] },
 						   {0.0,0.0,1.0}};
-	float max_allowed_area = 0.5 * target_volume;
+	float max_allowed_area = 0.75 * target_volume;
 	//set the max coefficient to the square root of max area
 	int max_coeff_1_4 = (int) sqrt(max_allowed_area ); 
 	int max_coeff_2_3 = (int) sqrt(max_allowed_area );
