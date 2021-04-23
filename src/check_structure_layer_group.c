@@ -37,10 +37,6 @@ int check_layer_group(crystal* xtal)
     //if result in a higher symmetry
     if (match == 0)
     {
-	  printf("The attempted layer group is %d\n",attempted_lg);
-	  printf( "#SPGLIB_detected_spacegroup = %d\n", spglib_spg);
-	  printf("after check all lg,match = 0 \n");
-	  fflush(stdout);
 
 	  //add the attemtped lg to test its operations
 	  spglib_lg[5] = attempted_lg;
