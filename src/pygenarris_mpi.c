@@ -8,7 +8,7 @@
 #include "spg_generation.h"
 #include "combinatorics.h"
 #include "check_structure.h"
-#include "check_structure_layer_group.h"
+#include "find_layer_group.h"
 #include "crystal_utils.h"
 #include "molecule_utils.h"
 #include "lattice_generator.h"

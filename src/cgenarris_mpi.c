@@ -16,7 +16,7 @@
 #include "algebra.h"
 #include "cgenarris_mpi.h"
 #include "pygenarris_mpi.h"
-#include "check_structure_layer_group.h"
+#include "find_layer_group.h"
 
 //maximum mulipicity possible
 #define ZMAX 192

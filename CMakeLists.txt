@@ -21,7 +21,7 @@ src/spg_generation.c
 
 # Layer groups
 src/lattice_generator_layer.c
-src/check_structure_layer_group.c
+src/find_layer_group.c
 
 # spglib sources
 src/spglib_src/arithmetic.c
