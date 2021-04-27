@@ -23,7 +23,7 @@ int check_layer_group(crystal* xtal)
     int spglib_spg = detect_spg_using_spglib(xtal);
     int spglib_lg[6]; //max 5 from detected and 1 of its original
     int match = 0;
-    for (int i =0;i<5;i++)
+    for (int i = 0; i < 5; i++)
     {
         spglib_lg[i] = spg_to_lg[spglib_spg-1][i];
         if (spglib_lg[i] == attempted_lg)
@@ -32,83 +32,65 @@ int check_layer_group(crystal* xtal)
         }
     }
 
-
-
     //if result in a higher symmetry
     if (match == 0)
     {
-
 	  //add the attemtped lg to test its operations
 	  spglib_lg[5] = attempted_lg;
-	
-	  /*
-	  // for check all lg
-	  int test = 1;
-	  //printf("I am here!!!!!!!!!!!!!!!!");
-	  for (int i=5; i<85;i++)
-	  {
-		  spglib_lg[i] = test;
-		  test ++;
-	  }
-	  */
-
 	  int array_compatible_lg[6];
 	  int counter = 0;
 
-	  for (int j = 0; j<6;j++)
-	    {
+	  for (int j = 0; j < 6; j++)
+	  {
 		  int lg = spglib_lg[j];
 		  int compatible = 0;
 		  
 		  if (lg != 0)
 		    {
-			    float Z = xtal->Z;
+			float Z = xtal->Z;
     			float N = xtal->num_atoms_in_molecule;
 		        crystal *tmp_xtal = (crystal *)malloc(sizeof(crystal) );
     			allocate_xtal(tmp_xtal,Z,N);
-			    copy_xtal(tmp_xtal, xtal);
+			copy_xtal(tmp_xtal, xtal);
 		        compatible = check_symmet_equiv_atoms(lg,tmp_xtal,Z,N);	
-				free_xtal(tmp_xtal);
-				if (compatible == 1)  //layer group is compatible
-				{
-					array_compatible_lg[counter] = lg;
-					counter ++;
-				}
-		
+			free_xtal(tmp_xtal);
+			if (compatible == 1)  //layer group is compatible
+			{
+				array_compatible_lg[counter] = lg;
+				counter ++;
+			}
 						
 		    }
 
-	    }
-		if (counter == 0)   // no compatible lg, error
+	   }
+	if (counter == 0)   // no compatible lg, error
+	{
+		printf("**error: no layer group found compatiblen return is -1**\n");
+		return -1;
+	}
+	else if (counter == 1)
+	{
+		return array_compatible_lg[0];
+	}
+	else
+	{
+		int max_num_ops = 0;
+		int matched_lg = 0;
+		for (int i = 0; i < counter; i++) //go through each compatible lg, return lg of max num operations
 		{
-			printf("**error: no layer group found compatiblen return is -1**\n");
-			return -1;
-		}
-		else if (counter == 1)
-		{
-			return array_compatible_lg[0];
-		}
-		else
-		{
-			int max_num_ops = 0;
-			int matched_lg = 0;
-			for (int i =0;i<counter; i++) //go through each compatible lg, return lg of max num operations
+			double translations[192][3];
+			int rotations[192][3][3];
+			int num_of_operations = get_lg_symmetry(array_compatible_lg[i],translations,rotations);
+			if (num_of_operations > max_num_ops)
 			{
-				double translations[192][3];
-    			int rotations[192][3][3];
-				int num_of_operations = get_lg_symmetry(array_compatible_lg[i],translations,rotations);
-				if (num_of_operations > max_num_ops)
-				{
-					max_num_ops = num_of_operations;
-					matched_lg = array_compatible_lg[i];
-				}
+				max_num_ops = num_of_operations;
+				matched_lg = array_compatible_lg[i];
 			}
-
-			return matched_lg;
-
-
 		}
 
+		return matched_lg;
+
+	}
 
     }
 	else
@@ -118,7 +100,7 @@ int check_layer_group(crystal* xtal)
 
 }
 
-int check_symmet_equiv_atoms(int lg,crystal* tmp_xtal,int Z, int N)
+int check_symmet_equiv_atoms(int lg, crystal* tmp_xtal, int Z, int N)
 {    
     
     float lattice_vec_a[3];
@@ -129,8 +111,8 @@ int check_symmet_equiv_atoms(int lg,crystal* tmp_xtal,int Z, int N)
     float norm_c = 0;
 
 	//convert original coords to frac and bring them to positive
-	convert_xtal_to_fractional(tmp_xtal);
-	bring_all_coords_to_pos(tmp_xtal);
+    convert_xtal_to_fractional(tmp_xtal);
+    bring_all_coords_to_pos(tmp_xtal);
 	//FILE *out_file;
 	//char f_orig_xtal_name[20] = "original_frac.in";
 	//out_file = fopen(f_orig_xtal_name,"w");
@@ -226,11 +208,6 @@ int check_symmet_equiv_atoms(int lg,crystal* tmp_xtal,int Z, int N)
 		free_xtal(tmp_xtal_each_op);
 		//fclose(outfile);
 
-
-   
-
-
-
 	}
 
 	return 1;
@@ -242,7 +219,7 @@ int compare_all_atoms_distance(crystal* tmp_xtal,crystal* tmp_xtal_each_op)
 	int N = tmp_xtal->num_atoms_in_molecule;
 	int total_atoms = N * Z;
 	int num_matched_atoms = 0;
-	for (int i =0;i< total_atoms ;i++)
+	for (int i = 0; i < total_atoms ; i++)
 	{
 		float atomi_array[3];
 		atomi_array[0] = tmp_xtal->Xcord[i];
@@ -260,6 +237,7 @@ int compare_all_atoms_distance(crystal* tmp_xtal,crystal* tmp_xtal_each_op)
 			float dist = sqrt(pow((atomi_array[0]-atomj_array[0]),2) + pow((atomi_array[1]-atomj_array[1]),2)
 				   + pow((atomi_array[2]-atomj_array[2]),2));
 
+//ritwit: Use an episilon macro or use an input param here
 			//printf("dist is %f\n",dist);
 			if (dist < 0.000015)  //each coords diff by less than 0.00001, distance diff less than 0.000015
 			{
@@ -291,67 +269,65 @@ void bring_all_coords_to_pos(crystal* xtal)
 	int Z = xtal->Z;
 	int N = xtal->num_atoms_in_molecule;
 	for (int k = 0; k < N * Z;k++)
+	{
+		float atomj_array[3];
+		atomj_array[0] = xtal->Xcord[k];
+	    	atomj_array[1] = xtal->Ycord[k];
+		atomj_array[2] = xtal->Zcord[k];
+		//check negative
+		if (atomj_array[0] < 0 && atomj_array[0] >= -1 )
 		{
-			float atomj_array[3];
-			atomj_array[0] = xtal->Xcord[k];
-		    atomj_array[1] = xtal->Ycord[k];
-		    atomj_array[2] = xtal->Zcord[k];
-			//check negative
-			if (atomj_array[0] < 0 && atomj_array[0] >= -1 )
-			{
-				//atomj_array[0] += 1;
-				xtal->Xcord[k] += 1;
-			}
-			if (atomj_array[1] < 0 && atomj_array[1] >= -1)
-			{
-				//atomj_array[1] += 1;
-				xtal->Ycord[k] += 1;
-			}
-			if (atomj_array[2] < 0 && atomj_array[2] >= -1)
-			{
-				//atomj_array[2] += 1;
-				xtal->Zcord[k] += 1;
-			}
-
-
-			//check 1
-			
-			if (atomj_array[0] < -1)
-			{
-				int int_part = (int)(atomj_array[0]-1);
-				xtal->Xcord[k] = atomj_array[0] - int_part;
-			}
-			if (atomj_array[1] < -1)
-			{
-				//atomj_array[1] -= 1.0;
-				int int_part = (int)(atomj_array[1]-1);
-				xtal->Ycord[k] = atomj_array[1]- int_part;
-			}
-			if (atomj_array[2] < -1)
-			{
-				//atomj_array[2] -= 1.0;
-				int int_part = (int)(atomj_array[2] -1);
-				xtal->Zcord[k] = atomj_array[2]- int_part;
-			}
-			
-
-			//check > 1
-			if (atomj_array[0] >=1)
-			{
-				int int_part = (int)atomj_array[0];
-				xtal->Xcord[k] = atomj_array[0] - int_part;
-			}
-			if (atomj_array[1] >= 1 )
-			{
-				int int_part = (int)atomj_array[1];
-				xtal->Ycord[k] = atomj_array[1] - int_part;
-			}
-			if (atomj_array[2] >= 1 )
-			{
-				int int_part = (int)atomj_array[2];
-				xtal->Zcord[k] = atomj_array[2] - int_part;
-			}
-
-
+			//atomj_array[0] += 1;
+			xtal->Xcord[k] += 1;
 		}
+		if (atomj_array[1] < 0 && atomj_array[1] >= -1)
+		{
+			//atomj_array[1] += 1;
+			xtal->Ycord[k] += 1;
+		}
+		if (atomj_array[2] < 0 && atomj_array[2] >= -1)
+		{
+			//atomj_array[2] += 1;
+			xtal->Zcord[k] += 1;
+		}
+
+
+		//check 1
+		
+		if (atomj_array[0] < -1)
+		{
+			int int_part = (int)(atomj_array[0]-1);
+			xtal->Xcord[k] = atomj_array[0] - int_part;
+		}
+		if (atomj_array[1] < -1)
+		{
+			//atomj_array[1] -= 1.0;
+			int int_part = (int)(atomj_array[1]-1);
+			xtal->Ycord[k] = atomj_array[1]- int_part;
+		}
+		if (atomj_array[2] < -1)
+		{
+			//atomj_array[2] -= 1.0;
+			int int_part = (int)(atomj_array[2] -1);
+			xtal->Zcord[k] = atomj_array[2]- int_part;
+		}
+		
+		//check > 1
+		if (atomj_array[0] >=1)
+		{
+			int int_part = (int)atomj_array[0];
+			xtal->Xcord[k] = atomj_array[0] - int_part;
+		}
+		if (atomj_array[1] >= 1 )
+		{
+			int int_part = (int)atomj_array[1];
+			xtal->Ycord[k] = atomj_array[1] - int_part;
+		}
+		if (atomj_array[2] >= 1 )
+		{
+			int int_part = (int)atomj_array[2];
+			xtal->Zcord[k] = atomj_array[2] - int_part;
+		}
+
+	}
 }
